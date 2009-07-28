@@ -185,10 +185,8 @@ int main(int argc, char **argv)
 
 	uint8_t iAacInitFlag = 0;
 	int32_t Status;
-	uint32_t aSamplesPerFrame = 0;
 	int32_t aOutputLength = 0;
 	int8_t  aIsFirstBuffer = 1;
-	uint16_t frame_length = 0;
 
 /* seek to first adts sync */
 	fread (iInputBuf, 1, 2, ifile);
@@ -217,7 +215,31 @@ int main(int argc, char **argv)
 	
 	while (1) {
 		
-	   	/* initialization of decoder (look into input stream)*/
+		/* countng rest of buffer */
+		pExt->inputBufferCurrentLength = KAAC_MAX_STREAMING_BUFFER_SIZE - pExt->inputBufferUsedLength;
+   		if((pExt->inputBufferUsedLength > 0) &&
+   						(pExt->inputBufferCurrentLength < KAAC_MAX_STREAMING_BUFFER_SIZE)){
+   			/* have bytes in buffer */
+   			memmove(	iInputBuf,
+   						iInputBuf + pExt->inputBufferUsedLength,
+       					pExt->inputBufferCurrentLength);
+   		} else {
+   			/* buffer empty */
+   			pExt->inputBufferCurrentLength = 0;
+   			pExt->inputBufferUsedLength = KAAC_MAX_STREAMING_BUFFER_SIZE;
+   		}
+   		
+   		/* receive new data */
+       	if(!fread(	iInputBuf+pExt->inputBufferCurrentLength,
+       				1, pExt->inputBufferUsedLength, ifile)) {
+			fprintf(stderr, "eof reached\n");
+			exit(-1);
+		}
+		pExt->inputBufferCurrentLength = KAAC_MAX_STREAMING_BUFFER_SIZE;
+		pExt->inputBufferUsedLength = 0;
+
+		
+	   	/* initialization of decoder (look into input stream) */
 	   	if (0 == iAacInitFlag) {
 	   		Status = PVMP4AudioDecoderConfig(pExt, pMem);
     		if (Status != MP4AUDEC_SUCCESS) {
@@ -230,7 +252,7 @@ int main(int argc, char **argv)
         	if (MP4AUDEC_SUCCESS == Status) {
 	        	fprintf(stderr, "[INIT] SUCCESS\n");
         		iAacInitFlag = 1;
-        		pExt->inputBufferUsedLength=0;
+        		//pExt->inputBufferUsedLength=0;
         	}
         	
         	
@@ -243,25 +265,12 @@ int main(int argc, char **argv)
       						pExt->inputBufferCurrentLength,
       						pExt->aacPlusUpsamplingFactor,
       						Status);
-			if(KAAC_MAX_STREAMING_BUFFER_SIZE <= pExt->inputBufferUsedLength) {
-		        fread(	iInputBuf,
-						KAAC_MAX_STREAMING_BUFFER_SIZE,
-						1,
-						ifile);
-				pExt->inputBufferUsedLength=0;
-		        pExt->inputBufferCurrentLength = KAAC_MAX_STREAMING_BUFFER_SIZE;
-			}
         	continue;
         }
 		
 		
-		/* after successful initialisation */
-		if (2 == pExt->aacPlusUpsamplingFactor) {
-        	aSamplesPerFrame = 2 * KAAC_NUM_SAMPLES_PER_FRAME;
-        } else {
-        	aSamplesPerFrame = KAAC_NUM_SAMPLES_PER_FRAME;
-        }
 		
+		/* after successful initialisation */
         Status = PVMP4AudioDecodeFrame(pExt, pMem);
        	fprintf(stderr, "[MAIN] Status: %d\n", Status);
        	
@@ -275,20 +284,20 @@ int main(int argc, char **argv)
        						pExt->inputBufferCurrentLength,
        						pExt->remainderBits,
        						pExt->frameLength);
-       		/*aOutputLength = pExt->frameLength * pExt->desiredChannels;*/
-       		aOutputLength = aSamplesPerFrame * pExt->desiredChannels;
+
+       		aOutputLength = pExt->frameLength;
        		fprintf(stderr, "[SUCCESS] aOutputLength (samples*channels): %d\n", aOutputLength);
 
 #ifdef AAC_PLUS
 			fprintf(stderr, "[SUCCESS] AAC_PLUS ENABLED\n");
         	if (2 == pExt->aacPlusUpsamplingFactor) {
+        		aOutputLength *= 2;
         		fprintf(stderr, "[SUCCESS] AAC_PLUS aOutputLength=%d\n", aOutputLength);
             	if (1 == pExt->desiredChannels) {
             		fprintf(stderr, "[SUCCESS] AAC_PLUS DOWNSAMPLE desiredChannels=%d\n",
             					pExt->desiredChannels);
                 	memcpy(&iOutputBuf[1024], &iOutputBuf[2048], (aOutputLength * 2));
             	}
-            	aOutputLength *= 2;
         	}
 #endif
         	//After decoding the first frame, modify all the input & output port settings
@@ -301,53 +310,29 @@ int main(int argc, char **argv)
         									  StreamType,
         									  pExt->aacPlusUpsamplingFactor);
         			PVMP4AudioDecoderDisableAacPlus(pExt, pMem);
-        			aSamplesPerFrame = KAAC_NUM_SAMPLES_PER_FRAME;
+        			aOutputLength = pExt->frameLength;
             	}
             	fprintf(stderr, "[SUCCESS] CreateWavHeader: desiredChannels=%d, samplingRate=%d\n",
             					pExt->desiredChannels,
             					pExt->samplingRate);
 				/*CreateWavHeader(ofile,  pExt->desiredChannels, pExt->samplingRate, 16);*/
-                aufile = open_audio_file(ofile, 48000, 2, FMT_16BIT, OUTPUT_WAV, 0);
-				fprintf(stderr, "[SUCCESS] aSamplesPerFrame=%d\n", aSamplesPerFrame);
+                aufile = open_audio_file(	ofile, 
+                							pExt->samplingRate,
+                							pExt->desiredChannels,
+                							FMT_16BIT,
+                							OUTPUT_WAV,
+                							0 /* no write big header */);
 				aIsFirstBuffer=0;
 			}
-			
-			write_audio_file(aufile, iOutputBuf, aOutputLength*2, 0);
-			pExt->inputBufferCurrentLength = KAAC_MAX_STREAMING_BUFFER_SIZE - pExt->inputBufferUsedLength;
-       		memmove(	iInputBuf,
-       					iInputBuf + pExt->inputBufferUsedLength,
-        				pExt->inputBufferCurrentLength);
-        	if(!fread(	iInputBuf+pExt->inputBufferCurrentLength,
-        				1, pExt->inputBufferUsedLength, ifile)) {
-				fprintf(stderr, "eof reached\n");
-				exit(-1);
-			}
-			pExt->inputBufferCurrentLength = KAAC_MAX_STREAMING_BUFFER_SIZE;
-			pExt->inputBufferUsedLength = 0;
-        	//print_bytes(iInputBuf, pExt->inputBufferCurrentLength);
-
+			/* save decoded frames */
+			write_audio_file(aufile, iOutputBuf, aOutputLength*pExt->desiredChannels, 0);
 
     	} else if (MP4AUDEC_INCOMPLETE_FRAME == Status) {
         	fprintf(stderr, "[INCOMPLETE] Status: MP4AUDEC_INCOMPLETE_FRAME\n");
-        	if (KAAC_MAX_STREAMING_BUFFER_SIZE - pExt->inputBufferUsedLength != 0) {
-        		fprintf(stderr, "[SUCCESS] inputBufferUsedLength: %d\n", pExt->inputBufferUsedLength);
-        		memmove(	iInputBuf,
-        					iInputBuf + pExt->inputBufferUsedLength,
-        					KAAC_MAX_STREAMING_BUFFER_SIZE - pExt->inputBufferUsedLength);
-        		
-        		pExt->inputBufferUsedLength=0;
-        	}
         } else {
         	fprintf(stderr, "[BAD] Status: %s, inputBufferUsedLength: %u\n", Status==1?"UNKNOWN":"BAD", pExt->inputBufferUsedLength);
-        	
-        	if (KAAC_MAX_STREAMING_BUFFER_SIZE - pExt->inputBufferUsedLength != 0) {
-        		fprintf(stderr, "[SUCCESS] inputBufferUsedLength: %d\n", pExt->inputBufferUsedLength);
-        		memmove(	iInputBuf,
-        					iInputBuf + pExt->inputBufferUsedLength,
-        					KAAC_MAX_STREAMING_BUFFER_SIZE - pExt->inputBufferUsedLength);
-        		
-        		pExt->inputBufferUsedLength=0;
-        	}
+       		pExt->inputBufferUsedLength=0;
+       		iAacInitFlag = 0;
     	}
     	fprintf(stderr,"---------------------------------------------------------\n");
 	}
