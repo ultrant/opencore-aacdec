@@ -127,6 +127,40 @@ int RetrieveDecodedStreamType(tPVMP4AudioDecoderExternal *pExt)
 }
 
 
+
+/* Receive data from source */
+int bufferUpdate(FILE *fhandle, tPVMP4AudioDecoderExternal *pExt){
+		/* rest of buffer */
+		int BytesNeeded = pExt->inputBufferUsedLength;
+		int BytesExists = pExt->inputBufferCurrentLength - pExt->inputBufferUsedLength;
+		
+		if(BytesExists >= 0) {
+			/* have bytes in buffer */
+			fprintf(stderr, "[GET] have %d bytes, ", BytesExists);
+			if(BytesExists > 0) {
+				memmove(	pExt->pInputBuffer,
+							pExt->pInputBuffer+BytesNeeded,
+							BytesExists);
+			}
+   			fprintf(stderr, "receiving %d bytes\n", BytesNeeded);
+   			if(!fread(	pExt->pInputBuffer+BytesExists,
+   						1, BytesNeeded, fhandle)) {
+   				fprintf(stderr, "[GET] eof reached\n");
+   				pExt->inputBufferCurrentLength = BytesExists;
+   				pExt->inputBufferUsedLength = 0;
+   				return 2;
+			} else {
+				pExt->inputBufferCurrentLength = KAAC_MAX_STREAMING_BUFFER_SIZE;
+				pExt->inputBufferUsedLength = 0;
+				return 1;
+   			}
+		} else if (BytesExists < 0) {
+			fprintf(stderr, "[GET] no buffer\n");
+		}
+		return 0;
+}
+
+
 /*
  * Decoder main l00p
  * */
@@ -152,12 +186,8 @@ int main(int argc, char **argv)
 	
 	parse_args(argc, argv);
 	
-	
-	
-	
-	
-	
 #ifdef AAC_PLUS
+	fprintf(stderr, "[MAIN] AAC+ ENABLED\n");
     pExt->pOutputBuffer_plus = &iOutputBuf[2048];
 #else
     pExt->pOutputBuffer_plus = NULL;
@@ -169,10 +199,12 @@ int main(int argc, char **argv)
     pExt->desiredChannels          = 2;
     pExt->inputBufferCurrentLength = 0;
     pExt->outputFormat             = OUTPUTFORMAT_16PCM_INTERLEAVED;
-    pExt->repositionFlag           = FALSE;
+    pExt->repositionFlag           = TRUE;
     pExt->aacPlusEnabled           = TRUE;  /* Dynamically enable AAC+ decoding */
     pExt->inputBufferUsedLength    = 0;
     pExt->remainderBits            = 0;
+    pExt->frameLength              = 0;
+    
 
     
 
@@ -181,18 +213,16 @@ int main(int argc, char **argv)
         exit(-1);
     }
     
-        
-
-	uint8_t iAacInitFlag = 0;
 	int32_t Status;
 	int32_t aOutputLength = 0;
 	int8_t  aIsFirstBuffer = 1;
 
-/* seek to first adts sync */
+	/* seek to first adts sync */
 	fread (iInputBuf, 1, 2, ifile);
+	fprintf(stderr, "sync search:");
 	while(1) {	
 		if (!((iInputBuf[0] == 0xFF)&&((iInputBuf[1] & 0xF6) == 0xF0))) {
-			fprintf(stderr, "sync search\n");
+			fprintf(stderr, ".");
 			iInputBuf[0] = iInputBuf[1];
 			if(!fread(iInputBuf+1, 1, 1, ifile)) {
 				fprintf(stderr, "eof reached\n");
@@ -206,76 +236,43 @@ int main(int argc, char **argv)
 			break;
 		}
 	}
-
+	fprintf(stderr, "found!\n");
    	pExt->inputBufferUsedLength=0;
    	pExt->inputBufferCurrentLength = KAAC_MAX_STREAMING_BUFFER_SIZE;
-	print_bytes(iInputBuf, pExt->inputBufferCurrentLength);
-	
+
 	audio_file *aufile = NULL;
 	
-	while (1) {
-		
-		/* countng rest of buffer */
-		pExt->inputBufferCurrentLength = KAAC_MAX_STREAMING_BUFFER_SIZE - pExt->inputBufferUsedLength;
-   		if((pExt->inputBufferUsedLength > 0) &&
-   						(pExt->inputBufferCurrentLength < KAAC_MAX_STREAMING_BUFFER_SIZE)){
-   			/* have bytes in buffer */
-   			memmove(	iInputBuf,
-   						iInputBuf + pExt->inputBufferUsedLength,
-       					pExt->inputBufferCurrentLength);
-   		} else {
-   			/* buffer empty */
-   			pExt->inputBufferCurrentLength = 0;
-   			pExt->inputBufferUsedLength = KAAC_MAX_STREAMING_BUFFER_SIZE;
+	/* pre-init search adts sync */
+	while (pExt->frameLength == 0) {
+   		Status = PVMP4AudioDecoderConfig(pExt, pMem);
+       	fprintf(stderr, "[INIT] Status[0]: %d\n", Status);
+   		if (Status != MP4AUDEC_SUCCESS) {
+       		Status = PVMP4AudioDecodeFrame(pExt, pMem);
+       		fprintf(stderr, "[INIT] Status[1]: %d\n", Status);
+       		if (MP4AUDEC_SUCCESS == Status) {
+   				fprintf(stderr, "[INIT] frameLength: %d\n", pExt->frameLength);
+    			continue;
+        	}
    		}
    		
-   		/* receive new data */
-       	if(!fread(	iInputBuf+pExt->inputBufferCurrentLength,
-       				1, pExt->inputBufferUsedLength, ifile)) {
-			fprintf(stderr, "eof reached\n");
-			exit(-1);
-		}
-		pExt->inputBufferCurrentLength = KAAC_MAX_STREAMING_BUFFER_SIZE;
-		pExt->inputBufferUsedLength = 0;
+   		if(!bufferUpdate(ifile, pExt)){
+   			exit(-1);
+   		}
+   		pExt->inputBufferUsedLength = 0;
+	}	
 
-		
-	   	/* initialization of decoder (look into input stream) */
-	   	if (0 == iAacInitFlag) {
-	   		Status = PVMP4AudioDecoderConfig(pExt, pMem);
-    		if (Status != MP4AUDEC_SUCCESS) {
-    			fprintf(stderr, "[INIT] can be adif?\n");
-        		Status = PVMP4AudioDecodeFrame(pExt, pMem);
-    		}
-    		
-        	fprintf(stderr, "[INIT] Status: %d\n", Status);
-        	
-        	if (MP4AUDEC_SUCCESS == Status) {
-	        	fprintf(stderr, "[INIT] SUCCESS\n");
-        		iAacInitFlag = 1;
-        		//pExt->inputBufferUsedLength=0;
-        	}
-        	
-        	
-        	
-        	fprintf(stderr, "[INIT] inputBufferUsedLength: %d, "
-      						"inputBufferCurrentLength: %d, "
-      						"aacPlusUpsamplingFactor: %d, "
-      						"Status: %d\n",
-      						pExt->inputBufferUsedLength,
-      						pExt->inputBufferCurrentLength,
-      						pExt->aacPlusUpsamplingFactor,
-      						Status);
-        	continue;
-        }
-		
-		
-		
-		/* after successful initialisation */
+	fprintf(stderr, "[INIT] Synced\n");
+	
+	/* main loop */
+	while (1) {
+		if(!bufferUpdate(ifile, pExt)){
+   			exit(0);
+   		}
+   				
         Status = PVMP4AudioDecodeFrame(pExt, pMem);
-       	fprintf(stderr, "[MAIN] Status: %d\n", Status);
-       	
+
        	if (MP4AUDEC_SUCCESS == Status || SUCCESS == Status) {
-       		fprintf(stderr, "[SUCCESS] Status: SUCCESS "
+			/*fprintf(stderr, "[SUCCESS] Status: SUCCESS "
        						"inputBufferUsedLength: %u, "
        						"inputBufferCurrentLength: %u, "
        						"remainderBits: %u, "
@@ -283,25 +280,30 @@ int main(int argc, char **argv)
        						pExt->inputBufferUsedLength,
        						pExt->inputBufferCurrentLength,
        						pExt->remainderBits,
-       						pExt->frameLength);
+       						pExt->frameLength);*/
 
        		aOutputLength = pExt->frameLength;
-       		fprintf(stderr, "[SUCCESS] aOutputLength (samples*channels): %d\n", aOutputLength);
+       		/*fprintf(stderr, "[SUCCESS] aOutputLength (samples*channels): %d\n", aOutputLength);*/
 
 #ifdef AAC_PLUS
-			fprintf(stderr, "[SUCCESS] AAC_PLUS ENABLED\n");
         	if (2 == pExt->aacPlusUpsamplingFactor) {
+        		/* we have 2x samples */
         		aOutputLength *= 2;
-        		fprintf(stderr, "[SUCCESS] AAC_PLUS aOutputLength=%d\n", aOutputLength);
+        		if (1 == aIsFirstBuffer) {
+        			fprintf(stderr, "[SUCCESS] AAC+ detected\n");
+        		}
+        		
             	if (1 == pExt->desiredChannels) {
-            		fprintf(stderr, "[SUCCESS] AAC_PLUS DOWNSAMPLE desiredChannels=%d\n",
-            					pExt->desiredChannels);
+	        		if (1 == aIsFirstBuffer) {
+    	    			fprintf(stderr, "[SUCCESS] downsampling stereo to mono\n");
+        			}
                 	memcpy(&iOutputBuf[1024], &iOutputBuf[2048], (aOutputLength * 2));
             	}
         	}
 #endif
         	//After decoding the first frame, modify all the input & output port settings
         	if (1 == aIsFirstBuffer) {
+        		/* first loop */
         		int StreamType = (int32_t) RetrieveDecodedStreamType(pExt);
         		
         		if ((0 == StreamType) && (2 == pExt->aacPlusUpsamplingFactor)) {
@@ -312,10 +314,10 @@ int main(int argc, char **argv)
         			PVMP4AudioDecoderDisableAacPlus(pExt, pMem);
         			aOutputLength = pExt->frameLength;
             	}
-            	fprintf(stderr, "[SUCCESS] CreateWavHeader: desiredChannels=%d, samplingRate=%d\n",
+            	fprintf(stderr, "[WAV] desiredChannels=%d, samplingRate=%d\n",
             					pExt->desiredChannels,
             					pExt->samplingRate);
-				/*CreateWavHeader(ofile,  pExt->desiredChannels, pExt->samplingRate, 16);*/
+				/* create wav header */
                 aufile = open_audio_file(	ofile, 
                 							pExt->samplingRate,
                 							pExt->desiredChannels,
@@ -328,13 +330,12 @@ int main(int argc, char **argv)
 			write_audio_file(aufile, iOutputBuf, aOutputLength*pExt->desiredChannels, 0);
 
     	} else if (MP4AUDEC_INCOMPLETE_FRAME == Status) {
-        	fprintf(stderr, "[INCOMPLETE] Status: MP4AUDEC_INCOMPLETE_FRAME\n");
+        	fprintf(stderr, "[STATUS] Status: MP4AUDEC_INCOMPLETE_FRAME\n");
+        	break;
         } else {
-        	fprintf(stderr, "[BAD] Status: %s, inputBufferUsedLength: %u\n", Status==1?"UNKNOWN":"BAD", pExt->inputBufferUsedLength);
-       		pExt->inputBufferUsedLength=0;
-       		iAacInitFlag = 0;
+        	fprintf(stderr, "[STATUS] Status: %s, eof?\n", Status==1?"UNKNOWN":"BAD");
+       		break;
     	}
-    	fprintf(stderr,"---------------------------------------------------------\n");
 	}
 	
 	close_audio_file(aufile);
