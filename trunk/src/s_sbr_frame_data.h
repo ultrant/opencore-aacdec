@@ -34,6 +34,7 @@
 #include    "e_coupling_mode.h"
 #include    "sbr_constants.h"
 #include    "s_patch.h"
+#include    "config.h"
 /*----------------------------------------------------------------------------
 ; MACROS
 ; Define module specific macros here

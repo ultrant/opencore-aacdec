@@ -219,6 +219,7 @@
 #include    "get_ga_specific_config.h"
 #include    "ibstream.h"
 #include    "sfb.h"                   /* Where samp_rate_info[] is declared */
+#include    "config.h"
 
 /*----------------------------------------------------------------------------
 ; MACROS

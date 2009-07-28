@@ -38,7 +38,7 @@
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "pv_audio_type_defs.h"
-
+#include "config.h"
 /*----------------------------------------------------------------------------
 ; MACROS
 ; Define module specific macros here

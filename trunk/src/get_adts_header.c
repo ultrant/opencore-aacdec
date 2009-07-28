@@ -278,6 +278,7 @@
 #include "set_mc_info.h"
 #include "find_adts_syncword.h"
 #include "get_adts_header.h"
+#include "config.h"
 
 /*----------------------------------------------------------------------------
 ; MACROS

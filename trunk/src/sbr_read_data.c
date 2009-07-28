@@ -85,6 +85,7 @@ Copyright (c) ISO/IEC 2002.
 /*----------------------------------------------------------------------------
 ; INCLUDES
 ----------------------------------------------------------------------------*/
+#include    "config.h"
 
 #ifdef AAC_PLUS
 
@@ -153,7 +154,8 @@ SBR_ERROR sbr_read_data(SBRDECODER_DATA * self,
 
     SBR_CHANNEL *SbrChannel = self->SbrChannel;
 
-    int32 zeropadding_bits;
+    Int32 zeropadding_bits;
+    Int32 lr;
 
     BIT_BUFFER bitBuf ;
 
@@ -262,7 +264,7 @@ SBR_ERROR sbr_read_data(SBRDECODER_DATA * self,
                 /* change of control data, reset decoder */
                 if (headerStatus == HEADER_RESET)
                 {
-                    for (Int32 lr = 0 ; lr < 2 ; lr++)
+                    for (lr = 0 ; lr < 2 ; lr++)
                     {
                         sbr_err = sbr_reset_dec(&(SbrChannel[lr].frameData),
                                                 sbrDec,

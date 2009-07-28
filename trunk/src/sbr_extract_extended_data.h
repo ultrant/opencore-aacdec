@@ -32,7 +32,7 @@
 #include    "pv_audio_type_defs.h"
 #include    "s_bit_buffer.h"
 #include    "s_sbr_frame_data.h"
-
+#include    "config.h"
 #ifdef PARAMETRICSTEREO
 #include    "s_ps_dec.h"
 #endif

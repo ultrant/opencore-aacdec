@@ -102,6 +102,8 @@
 #include "get_audio_specific_config.h"
 #include "pvmp4audiodecoder_api.h"   /* Where this function is declared */
 #include "set_mc_info.h"
+#include "config.h"
+
 
 /*----------------------------------------------------------------------------
 ; MACROS

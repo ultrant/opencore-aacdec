@@ -75,6 +75,8 @@ Copyright (c) ISO/IEC 2002.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 
+#include    "config.h"
+
 #ifdef AAC_PLUS
 
 

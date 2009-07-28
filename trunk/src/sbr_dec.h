@@ -70,6 +70,7 @@ Copyright (c) ISO/IEC 2002.
 #include    "e_blockswitching.h"
 #include    "s_sbr_dec.h"
 #include    "s_tdec_int_file.h"
+#include    "config.h"
 #ifdef PARAMETRICSTEREO
 #include    "s_ps_dec.h"
 #endif

@@ -95,6 +95,8 @@ Copyright (c) ISO/IEC 2003.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 
+#include    "config.h"
+
 #ifdef AAC_PLUS
 
 #ifdef PARAMETRICSTEREO
