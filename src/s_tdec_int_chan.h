@@ -51,6 +51,8 @@ extern "C"
 #include "e_window_shape.h"
 #include "e_window_sequence.h"
 #include "window_block_fxp.h"
+#include "config.h"
+
 
     /*----------------------------------------------------------------------------
     ; MACROS

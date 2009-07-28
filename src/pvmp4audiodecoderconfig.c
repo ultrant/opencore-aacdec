@@ -102,6 +102,7 @@
 
 #include "get_audio_specific_config.h"
 #include "pvmp4audiodecoder_api.h"   /* Where this function is declared */
+#include "config.h"
 
 
 /*----------------------------------------------------------------------------

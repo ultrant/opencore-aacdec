@@ -41,6 +41,8 @@
 #include "s_ch_info.h"
 #include "chans.h"
 #include "e_tmp4audioobjecttype.h"
+#include "config.h"
+
 
 /*----------------------------------------------------------------------------
 ; MACROS

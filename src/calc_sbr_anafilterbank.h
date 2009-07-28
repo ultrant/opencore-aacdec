@@ -37,6 +37,7 @@
 ----------------------------------------------------------------------------*/
 
 #include "pv_audio_type_defs.h"
+#include "config.h"
 
 #ifdef __cplusplus
 extern "C"

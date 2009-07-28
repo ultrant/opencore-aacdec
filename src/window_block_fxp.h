@@ -70,6 +70,7 @@
 #include "pv_audio_type_defs.h"
 #include "e_window_shape.h"
 #include "e_window_sequence.h"
+#include "config.h"
 
 /*----------------------------------------------------------------------------
 ; MACROS

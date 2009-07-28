@@ -55,6 +55,8 @@ extern "C"
 #include "s_sbr_channel.h"
 #include "s_sbr_dec.h"
 #include "s_sbrbitstream.h"
+#include "config.h"
+
 
     /*----------------------------------------------------------------------------
     ; MACROS

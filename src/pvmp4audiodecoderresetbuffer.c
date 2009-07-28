@@ -82,6 +82,8 @@
 #include "s_tdec_int_file.h"
 #include "pvmp4audiodecoder_api.h"   /* Where this function is declared */
 #include "aac_mem_funcs.h"
+#include "config.h"
+
 
 #ifdef AAC_PLUS
 #include    "s_sbr_frame_data.h"

@@ -31,7 +31,7 @@
 
 #include    "s_sbr_frame_data.h"
 #include    "e_sbr_sync_state.h"
-
+#include    "config.h"
 #ifdef PARAMETRICSTEREO
 #include "s_ps_dec.h"
 

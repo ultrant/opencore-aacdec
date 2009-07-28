@@ -146,6 +146,7 @@
 #include "pvmp4audiodecoder_api.h" /* Where this function is declared       */
 #include "s_tdec_int_chan.h"
 #include "sfb.h"                   /* samp_rate_info[] is declared here     */
+#include "config.h"
 
 /*----------------------------------------------------------------------------
 ; MACROS

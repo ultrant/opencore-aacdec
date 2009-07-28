@@ -75,6 +75,9 @@ Copyright (c) ISO/IEC 2002.
 /*----------------------------------------------------------------------------
 ; INCLUDES
 ----------------------------------------------------------------------------*/
+
+#include    "config.h"
+
 #ifdef AAC_PLUS
 
 
@@ -169,7 +172,7 @@ void sbr_dec(Int16 *inPcmData,
 
     Int32(*scratch_mem)[64];
     Int16 *circular_buffer_s;
-
+    
     Int32   k;
     Int32 *Sr;
     Int32 *Si;
@@ -450,7 +453,7 @@ void sbr_dec(Int16 *inPcmData,
 
 
 
-            for (int32 j = 0; j < xoverBand; j++)
+            for (j = 0; j < xoverBand; j++)
             {
                 Sr_x[j] = shft_lft_1(hFrameData->codecQmfBufferReal[m][j]);
                 Si_x[j] = shft_lft_1(hFrameData->codecQmfBufferImag[m][j]);
@@ -482,7 +485,7 @@ void sbr_dec(Int16 *inPcmData,
         {
             m = sbrDec->bufReadOffs + i;     /*  2 + i */
 
-            for (int32 j = 0; j < 5; j++)
+            for (j = 0; j < 5; j++)
             {
                 hParametricStereoDec->qmfBufferReal[i][j] = shft_lft_1(hFrameData->codecQmfBufferReal[m][j]);
                 hParametricStereoDec->qmfBufferImag[i][j] = shft_lft_1(hFrameData->codecQmfBufferImag[m][j]);

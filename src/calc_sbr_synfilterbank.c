@@ -71,6 +71,8 @@ Copyright (c) ISO/IEC 2002.
 ------------------------------------------------------------------------------
 */
 
+#include "config.h"
+
 #ifdef AAC_PLUS
 
 /*----------------------------------------------------------------------------
@@ -230,6 +232,7 @@ void calc_sbr_synfilterbank_LC(Int32 * Sr,
                                Bool bDownSampleSBR)
 {
     Int32 i;
+    Int   k;
 
     Int32   realAccu1;
     Int32   realAccu2;
@@ -396,7 +399,7 @@ void calc_sbr_synfilterbank_LC(Int32 * Sr,
         const Int32* pt_C1 = &sbrDecoderFilterbankCoefficients_down_smpl[0];
         pt_C2 = &sbrDecoderFilterbankCoefficients_down_smpl[16];
 
-        for (int k = 0; k < 5; k++)
+        for (k = 0; k < 5; k++)
         {
             pt_out -= 32;
             for (i = 0; i < 16; i++)
@@ -436,6 +439,7 @@ void calc_sbr_synfilterbank(Int32 * Sr,
                             Bool bDownSampleSBR)
 {
     Int32 i;
+    Int   k;
 
     const Int32 *pt_C2;
 
@@ -595,7 +599,7 @@ void calc_sbr_synfilterbank(Int32 * Sr,
         const Int32* pt_C1 = &sbrDecoderFilterbankCoefficients_down_smpl[0];
         pt_C2 = &sbrDecoderFilterbankCoefficients_down_smpl[16];
 
-        for (Int k = 0; k < 5; k++)
+        for (k = 0; k < 5; k++)
         {
             pt_out -= 32;
             for (i = 0; i < 16; i++)

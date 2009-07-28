@@ -66,6 +66,7 @@ Copyright (c) ISO/IEC 2002.
 ----------------------------------------------------------------------------*/
 #include    "s_sbr_frame_data.h"
 #include    "sbr_generate_high_freq.h"
+#include    "config.h"
 /*----------------------------------------------------------------------------
 ; MACROS
 ; Define module specific macros here

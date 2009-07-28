@@ -281,6 +281,7 @@
 #include "sbr_open.h"
 #include "get_sbr_bitstream.h"
 #include "e_sbr_element_id.h"
+#include "config.h"
 
 
 
@@ -357,9 +358,8 @@ OSCL_EXPORT_REF Int PVMP4AudioDecodeFrame(
     SBRDECODER_DATA *sbrDecoderData;
     SBR_DEC         *sbrDec;
     SBRBITSTREAM    *sbrBitStream;
-#else
-	Int32 i;
 #endif
+	Int32 i;
 
     /*
      * Initialize "helper" pointers to existing memory.
@@ -888,7 +888,7 @@ OSCL_EXPORT_REF Int PVMP4AudioDecodeFrame(
                     Int16 * pt = &pExt->pOutputBuffer[ch];
                     Int16 * ptr = &(pChVars[ch]->ltp_buffer[pVars->ltp_buffer_state]);
                     Int16  x, y;
-                    for (Int32 i = HALF_LONG_WINDOW; i != 0; i--)
+                    for (i = HALF_LONG_WINDOW; i != 0; i--)
                     {
                         x = *pt;
                         pt += 2;

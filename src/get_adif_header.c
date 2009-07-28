@@ -201,6 +201,7 @@
 #include "ibstream.h"
 
 #include "get_adif_header.h"
+#include "config.h"
 
 /*----------------------------------------------------------------------------
 ; MACROS

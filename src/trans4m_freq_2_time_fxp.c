@@ -422,6 +422,7 @@ static inline Int16 sat(Int32 y)
 /*----------------------------------------------------------------------------
 ; FUNCTION CODE
 ----------------------------------------------------------------------------*/
+#include    "config.h"
 
 #ifdef AAC_PLUS
 
@@ -1407,7 +1408,7 @@ void trans4m_freq_2_time_fxp_1(
          *  so is ready for next iteration
          */
 
-        for (int i = 0; i < W_L_STOP_2; i++)
+        for (i = 0; i < W_L_STOP_2; i++)
         {
             temp = *(pOverlap_and_Add_Buffer_2++);
             *(pOverlap_and_Add_Buffer_1x++) = temp;

@@ -48,6 +48,8 @@
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 
+#include    "config.h"
+
 #ifdef AAC_PLUS
 
 #include "pv_audio_type_defs.h"
