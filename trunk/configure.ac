@@ -32,42 +32,39 @@ dnl ############## Arguments Checks
 AC_MSG_CHECKING([enabled SBR decoding])
 AC_ARG_WITH([aac_plus], [APR_HELP_STRING([--with-aac-plus], [enable SBR decoding [[default=yes]]])],
 [
-    if test "$with_aac_plus" = "no"; then
+    if test "$with_aac_plus" == "no"; then
         AC_MSG_RESULT([no])
     else
-		AC_DEFINE([AAC_PLUS], 1, [SBR decoding])
-		AC_MSG_RESULT([yes])		
+        AC_DEFINE([AAC_PLUS], 1, [SBR decoding])
+        AC_MSG_RESULT([yes])
     fi
 ], [AC_MSG_RESULT([yes])])
 
 
 
 if test "$with_aac_plus" != "no"; then
-	AC_MSG_CHECKING([enabled High-Quality SBR algorithms])
-	AC_ARG_WITH([hq_sbr], [APR_HELP_STRING([--with-hq-sbr], [enable High-Quality SBR algorithms [[default=yes]]])],
-	[
-	    if test "$with_hq_sbr" = "no"; then
-			AC_MSG_RESULT([no])
-	    else
-			AC_DEFINE([HQ_SBR], 1, [High-Quality SBR])
-			AC_MSG_RESULT([yes])
-	    fi
-	], [AC_MSG_RESULT([yes])])
-
-	AC_MSG_CHECKING([enabled Parametric-Stereo decoding])
-	AC_ARG_WITH([ps], [APR_HELP_STRING([--with-ps], [enable Parametric-Stereo decoding [[default=yes]]])],
-	[
-	    if test "$with_ps" = "no"; then
-			AC_MSG_RESULT([no])
-		else
-			AC_DEFINE([PARAMETRICSTEREO], 1, [Parametric-Stereo decoding])
-			AC_MSG_RESULT([yes])
-		fi
-	], [AC_MSG_RESULT([yes])])
+    AC_MSG_CHECKING([enabled High-Quality SBR algorithms])
+    AC_ARG_WITH([hq_sbr], [APR_HELP_STRING([--with-hq-sbr], [enable High-Quality SBR algorithms [[default=yes]]])],
+    [
+        if test "$with_hq_sbr" == "no"; then
+            AC_MSG_RESULT([no])
+        else
+            AC_DEFINE([HQ_SBR], 1, [High-Quality SBR])
+            AC_MSG_RESULT([yes])
+        fi
+    ], [AC_MSG_RESULT([yes])])
+    
+    AC_MSG_CHECKING([enabled Parametric-Stereo decoding])
+    AC_ARG_WITH([ps], [APR_HELP_STRING([--with-ps], [enable Parametric-Stereo decoding [[default=yes]]])],
+    [
+        if test "$with_ps" == "no"; then
+            AC_MSG_RESULT([no])
+        else
+            AC_DEFINE([PARAMETRICSTEREO], 1, [Parametric-Stereo decoding])
+            AC_MSG_RESULT([yes])
+        fi
+    ], [AC_MSG_RESULT([yes])])
 fi
-
-
-
 
 
 
@@ -100,7 +97,7 @@ case "$target_or_host" in
     *armv4te*)
         have_arm=yes
         with_arm_gcc_v4=yes ;;
-    *armv*)
+    *arm*)
         have_arm=yes ;;
     ppc-*-linux* | powerpc-*)
         have_ppc=yes ;;
