@@ -323,7 +323,7 @@ int main(int argc, char **argv)
                 							pExt->desiredChannels,
                 							FMT_16BIT,
                 							OUTPUT_WAV,
-                							0 /* no write big header */);
+                							0 /* write big header */);
 				aIsFirstBuffer=0;
 			}
 			/* save decoded frames */

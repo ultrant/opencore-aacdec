@@ -45,7 +45,6 @@ audio_file *open_audio_file(FILE *infile, int samplerate, int channels,
 
     aufile->samplerate = samplerate;
     aufile->channels = channels;
-    aufile->total_samples = 0;
     aufile->fileType = fileType;
     aufile->channelMask = channelMask;
 
@@ -74,7 +73,8 @@ audio_file *open_audio_file(FILE *infile, int samplerate, int channels,
         if (aufile) free(aufile);
         return NULL;
     }
-
+	
+	aufile->total_samples = MAXWAVESIZE;
     if (aufile->fileType == OUTPUT_WAV)
     {
         if (aufile->channelMask)
@@ -82,7 +82,8 @@ audio_file *open_audio_file(FILE *infile, int samplerate, int channels,
         else
             write_wav_header(aufile);
     }
-
+	aufile->total_samples = 0;
+	
     return aufile;
 }
 
