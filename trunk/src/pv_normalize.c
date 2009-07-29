@@ -51,6 +51,7 @@ Returns
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 
+#include "config.h"
 #include "pv_audio_type_defs.h"
 #include "pv_normalize.h"
 

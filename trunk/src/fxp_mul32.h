@@ -28,6 +28,8 @@
 #ifndef FXP_MUL32
 #define FXP_MUL32
 
+#include "config.h"
+
 #if   defined(PV_ARM_V5)
 
 #include "fxp_mul32_arm_v5.h"

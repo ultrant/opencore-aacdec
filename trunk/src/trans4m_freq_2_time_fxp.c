@@ -306,6 +306,8 @@ OUT          ==============================================================
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 
+#include "config.h"
+
 #include "pv_audio_type_defs.h"
 #include "aac_mem_funcs.h"
 #include "window_block_fxp.h"
