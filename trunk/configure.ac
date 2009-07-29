@@ -199,19 +199,14 @@ AC_ARG_WITH([netplayer], [APR_HELP_STRING([--with-netplayer], [enable Network pl
 
 dnl ############## Header Checks
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h string.h unistd.h pthread.h])
+AC_CHECK_HEADERS([stdlib.h string.h unistd.h])
 
 if test "$with_netplayer" != "no"; then
-	AC_CHECK_HEADERS([curl/curl.h])
+	AC_CHECK_HEADERS([curl/curl.h pthread.h])
 	PKG_CHECK_MODULES([CURL], [libcurl >= 7.16])
-	NETPLAYER_CFLAGS="$libcurl_CFLAGS"
-	NETPLAYER_LIBS="$libcurl_LIBS"
-	AC_SUBST(with_netplayer)
 	NETPLAYER=aacNetPlayer
 	AC_SUBST(NETPLAYER)
-	AC_SUBST(NETPLAYER_LIBS)
-	AC_SUBST(NETPLAYER_CFLAGS)
-	fi
+fi
 
 dnl ############## Final Output
 CFLAGS="$CFLAGS -Wall"
