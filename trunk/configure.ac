@@ -180,6 +180,7 @@ AC_ARG_WITH([arm_gcc_v5], [APR_HELP_STRING([--with-arm-gcc-v5], [GCC ARM v5 [[de
         AC_MSG_RESULT([no])
     else
         AC_DEFINE([PV_ARM_GCC_V5], 1, [GCC ARM v5])
+        CFLAGS="$CFLAGS -march=armv5te"
         AC_MSG_RESULT([yes])
     fi
 ], [AC_MSG_RESULT([no])])
