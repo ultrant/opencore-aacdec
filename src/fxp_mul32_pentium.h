@@ -34,7 +34,7 @@ extern "C"
 {
 #endif
 
-
+#include "config.h"
 #include "pv_audio_type_defs.h"
 
 

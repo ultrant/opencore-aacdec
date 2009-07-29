@@ -35,7 +35,7 @@ extern "C"
 {
 #endif
 
-
+#include "config.h"
 #include "pv_audio_type_defs.h"
 
 #if defined(PV_ARM_MSC_EVC_V4)

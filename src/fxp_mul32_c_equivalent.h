@@ -36,6 +36,7 @@ extern "C"
 
 
 #include <inttypes.h>
+#include "config.h"
 #include "pv_audio_type_defs.h"
 
 #if defined(C_EQUIVALENT)

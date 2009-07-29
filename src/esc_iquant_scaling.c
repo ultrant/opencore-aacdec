@@ -219,6 +219,8 @@
 /*----------------------------------------------------------------------------
 ; INCLUDES
 ----------------------------------------------------------------------------*/
+#include "config.h"
+
 #include "pv_audio_type_defs.h"
 #include "iquant_table.h"
 #include "esc_iquant_scaling.h"

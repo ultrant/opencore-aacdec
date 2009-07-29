@@ -32,6 +32,7 @@ with_aac_plus="yes"
 with_hq_sbr="yes"
 with_ps="yes"
 
+
 AC_MSG_CHECKING([enabled SBR decoding])
 AC_ARG_WITH([aac_plus], [APR_HELP_STRING([--with-aac-plus], [enable SBR decoding [[default=yes]]])],
 [
@@ -70,6 +71,113 @@ AC_ARG_WITH([aac_plus], [APR_HELP_STRING([--with-aac-plus], [enable SBR decoding
 
 
 
+
+#
+# check target architecture
+#
+have_x86=no
+have_arm=no
+
+case x"$target" in
+    xNONE | x)
+        target_or_host="$host" ;;
+    *)
+        target_or_host="$target" ;;
+esac
+
+case "$target_or_host" in
+    i*86-*-*)
+        have_x86=yes ;;
+    *arm*)
+        have_arm=yes ;;
+    ppc-*-linux* | powerpc-*)
+        have_ppc=yes ;;
+    *)
+        ;;
+esac
+
+
+if test x$have_arm = xyes; then
+
+dnl ############## ASM Optimisations
+with_arm_v4=no
+with_arm_v5=no
+with_arm_msc_evc_v4=no
+with_arm_msc_evc_v5=no
+with_arm_gcc_v4=no
+with_arm_gcc_v5=yes
+
+# EXTENDED_ASM
+
+dnl ############## Simple ARM
+AC_MSG_CHECKING([enabled ARM v4])
+AC_ARG_WITH([arm_v4], [APR_HELP_STRING([--with-arm-v4], [ARM v4 [[default=no]]])],
+[
+    if test "$with_arm_v4" = "yes"; then
+        AC_DEFINE([PV_ARM_V4], 1, [ARM v4])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+    fi
+], [AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([enabled ARM v5])
+AC_ARG_WITH([arm_v5], [APR_HELP_STRING([--with-arm-v5], [ARM v5 [[default=no]]])],
+[
+    if test "$with_arm_v5" = "yes"; then
+        AC_DEFINE([PV_ARM_V5], 1, [ARM v5])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+    fi
+], [AC_MSG_RESULT([no])])
+
+dnl ############## MSC EVC ARM
+AC_MSG_CHECKING([enabled MSC EVC ARM v4])
+AC_ARG_WITH([arm_msc_evc_v4], [APR_HELP_STRING([--with-arm-msc-evc-v4], [MSC EVC ARM v4 [[default=no]]])],
+[
+    if test "$with_arm_msc_evc_v4" = "yes"; then
+        AC_DEFINE([PV_ARM_MSC_EVC_V4], 1, [MSC EVC ARM v4])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+    fi
+], [AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([enabled MSC EVC ARM v5])
+AC_ARG_WITH([arm_msc_evc_v5], [APR_HELP_STRING([--with-arm-msc-evc-v5], [MSC EVC ARM v5 [[default=no]]])],
+[
+    if test "$with_arm_msc_evc_v5" = "yes"; then
+        AC_DEFINE([PV_ARM_MSC_EVC_V5], 1, [MSC EVC ARM v5])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+    fi
+], [AC_MSG_RESULT([no])])
+
+dnl ############## GCC ARM
+AC_MSG_CHECKING([enabled GCC ARM v4])
+AC_ARG_WITH([arm_gcc_v4], [APR_HELP_STRING([--with-arm-gcc-v4], [GCC ARM v4 [[default=no]]])],
+[
+    if test "$with_arm_gcc_v4" = "yes"; then
+        AC_DEFINE([PV_ARM_GCC_V4], 1, [GCC ARM v4])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+    fi
+], [AC_MSG_RESULT([no])])
+
+AC_MSG_CHECKING([enabled GCC ARM v5])
+AC_ARG_WITH([arm_gcc_v5], [APR_HELP_STRING([--with-arm-gcc-v5], [GCC ARM v5 [[default=no]]])],
+[
+    if test "$with_arm_gcc_v5" = "yes"; then
+        AC_DEFINE([PV_ARM_GCC_V5], 1, [GCC ARM v5])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+    fi
+], [AC_MSG_RESULT([no])])
+fi
 
 
 # PV_ARM_V5
