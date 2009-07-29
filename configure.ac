@@ -28,10 +28,6 @@ AC_HELP_STRING([$1],[$2]),[  ][$1] substr([
 
 
 dnl ############## Arguments Checks
-with_aac_plus="yes"
-with_hq_sbr="yes"
-with_ps="yes"
-
 
 AC_MSG_CHECKING([enabled SBR decoding])
 AC_ARG_WITH([aac_plus], [APR_HELP_STRING([--with-aac-plus], [enable SBR decoding [[default=yes]]])],
@@ -40,34 +36,37 @@ AC_ARG_WITH([aac_plus], [APR_HELP_STRING([--with-aac-plus], [enable SBR decoding
         AC_MSG_RESULT([no])
     else
 		AC_DEFINE([AAC_PLUS], 1, [SBR decoding])
-		AC_MSG_RESULT([yes])
-		
-		AC_MSG_CHECKING([enabled High-Quality SBR algorithms])
-		AC_ARG_WITH([hq_sbr], [APR_HELP_STRING([--with-hq-sbr], [enable High-Quality SBR algorithms [[default=yes]]])],
-		[
-		    if test "$with_hq_sbr" = "no"; then
-			AC_MSG_RESULT([no])
-		    else
-			AC_DEFINE([HQ_SBR], 1, [High-Quality SBR])
-			AC_MSG_RESULT([yes])
-		    fi
-		], [AC_MSG_RESULT([yes])])
-		
-		
-		AC_MSG_CHECKING([enabled Parametric-Stereo decoding])
-		AC_ARG_WITH([ps], [APR_HELP_STRING([--with-ps], [enable Parametric-Stereo decoding [[default=yes]]])],
-		[
-		    if test "$with_ps" = "no"; then
-			AC_MSG_RESULT([no])
-		    else
-			AC_DEFINE([PARAMETRICSTEREO], 1, [Parametric-Stereo decoding])
-			AC_MSG_RESULT([yes])
-		    fi
-		], [AC_MSG_RESULT([yes])])
-		
-		
+		AC_MSG_RESULT([yes])		
     fi
 ], [AC_MSG_RESULT([yes])])
+
+
+
+if test "$with_aac_plus" != "no"; then
+	AC_MSG_CHECKING([enabled High-Quality SBR algorithms])
+	AC_ARG_WITH([hq_sbr], [APR_HELP_STRING([--with-hq-sbr], [enable High-Quality SBR algorithms [[default=yes]]])],
+	[
+	    if test "$with_hq_sbr" = "no"; then
+			AC_MSG_RESULT([no])
+	    else
+			AC_DEFINE([HQ_SBR], 1, [High-Quality SBR])
+			AC_MSG_RESULT([yes])
+	    fi
+	], [AC_MSG_RESULT([yes])])
+
+	AC_MSG_CHECKING([enabled Parametric-Stereo decoding])
+	AC_ARG_WITH([ps], [APR_HELP_STRING([--with-ps], [enable Parametric-Stereo decoding [[default=yes]]])],
+	[
+	    if test "$with_ps" = "no"; then
+			AC_MSG_RESULT([no])
+		else
+			AC_DEFINE([PARAMETRICSTEREO], 1, [Parametric-Stereo decoding])
+			AC_MSG_RESULT([yes])
+		fi
+	], [AC_MSG_RESULT([yes])])
+fi
+
+
 
 
 
@@ -77,6 +76,13 @@ AC_ARG_WITH([aac_plus], [APR_HELP_STRING([--with-aac-plus], [enable SBR decoding
 #
 have_x86=no
 have_arm=no
+
+with_arm_v4=no
+with_arm_v5=no
+with_arm_msc_evc_v4=no
+with_arm_msc_evc_v5=no
+with_arm_gcc_v4=no
+with_arm_gcc_v5=no
 
 case x"$target" in
     xNONE | x)
@@ -88,7 +94,13 @@ esac
 case "$target_or_host" in
     i*86-*-*)
         have_x86=yes ;;
-    *arm*)
+    *armv5te*)
+        have_arm=yes
+        with_arm_gcc_v5=yes ;;
+    *armv4te*)
+        have_arm=yes
+        with_arm_gcc_v4=yes ;;
+    *armv*)
         have_arm=yes ;;
     ppc-*-linux* | powerpc-*)
         have_ppc=yes ;;
@@ -100,12 +112,6 @@ esac
 if test x$have_arm = xyes; then
 
 dnl ############## ASM Optimisations
-with_arm_v4=no
-with_arm_v5=no
-with_arm_msc_evc_v4=no
-with_arm_msc_evc_v5=no
-with_arm_gcc_v4=no
-with_arm_gcc_v5=yes
 
 # EXTENDED_ASM
 
@@ -113,22 +119,22 @@ dnl ############## Simple ARM
 AC_MSG_CHECKING([enabled ARM v4])
 AC_ARG_WITH([arm_v4], [APR_HELP_STRING([--with-arm-v4], [ARM v4 [[default=no]]])],
 [
-    if test "$with_arm_v4" = "yes"; then
+    if test "$with_arm_v4" == "no"; then
+        AC_MSG_RESULT([no])
+    else
         AC_DEFINE([PV_ARM_V4], 1, [ARM v4])
         AC_MSG_RESULT([yes])
-    else
-        AC_MSG_RESULT([no])
     fi
 ], [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING([enabled ARM v5])
 AC_ARG_WITH([arm_v5], [APR_HELP_STRING([--with-arm-v5], [ARM v5 [[default=no]]])],
 [
-    if test "$with_arm_v5" = "yes"; then
+    if test "$with_arm_v5" == "no"; then
+        AC_MSG_RESULT([no])
+    else
         AC_DEFINE([PV_ARM_V5], 1, [ARM v5])
         AC_MSG_RESULT([yes])
-    else
-        AC_MSG_RESULT([no])
     fi
 ], [AC_MSG_RESULT([no])])
 
@@ -136,62 +142,76 @@ dnl ############## MSC EVC ARM
 AC_MSG_CHECKING([enabled MSC EVC ARM v4])
 AC_ARG_WITH([arm_msc_evc_v4], [APR_HELP_STRING([--with-arm-msc-evc-v4], [MSC EVC ARM v4 [[default=no]]])],
 [
-    if test "$with_arm_msc_evc_v4" = "yes"; then
+    if test "$with_arm_msc_evc_v4" == "no"; then
+        AC_MSG_RESULT([no])
+    else
         AC_DEFINE([PV_ARM_MSC_EVC_V4], 1, [MSC EVC ARM v4])
         AC_MSG_RESULT([yes])
-    else
-        AC_MSG_RESULT([no])
     fi
 ], [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING([enabled MSC EVC ARM v5])
 AC_ARG_WITH([arm_msc_evc_v5], [APR_HELP_STRING([--with-arm-msc-evc-v5], [MSC EVC ARM v5 [[default=no]]])],
 [
-    if test "$with_arm_msc_evc_v5" = "yes"; then
+    if test "$with_arm_msc_evc_v5" == "no"; then
+        AC_MSG_RESULT([no])
+    else
         AC_DEFINE([PV_ARM_MSC_EVC_V5], 1, [MSC EVC ARM v5])
         AC_MSG_RESULT([yes])
-    else
-        AC_MSG_RESULT([no])
     fi
 ], [AC_MSG_RESULT([no])])
 
 dnl ############## GCC ARM
 AC_MSG_CHECKING([enabled GCC ARM v4])
-AC_ARG_WITH([arm_gcc_v4], [APR_HELP_STRING([--with-arm-gcc-v4], [GCC ARM v4 [[default=no]]])],
+AC_ARG_WITH([arm_gcc_v4], [APR_HELP_STRING([--with-arm-gcc-v4], [GCC ARM v4 [[default=auto]]])],
 [
-    if test "$with_arm_gcc_v4" = "yes"; then
+    if test "$with_arm_gcc_v4" == "no"; then
+        AC_MSG_RESULT([no])
+    else
         AC_DEFINE([PV_ARM_GCC_V4], 1, [GCC ARM v4])
         AC_MSG_RESULT([yes])
-    else
-        AC_MSG_RESULT([no])
     fi
 ], [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING([enabled GCC ARM v5])
-AC_ARG_WITH([arm_gcc_v5], [APR_HELP_STRING([--with-arm-gcc-v5], [GCC ARM v5 [[default=no]]])],
+AC_ARG_WITH([arm_gcc_v5], [APR_HELP_STRING([--with-arm-gcc-v5], [GCC ARM v5 [[default=auto]]])],
 [
-    if test "$with_arm_gcc_v5" = "yes"; then
+    if test "$with_arm_gcc_v5" == "no"; then
+        AC_MSG_RESULT([no])
+    else
         AC_DEFINE([PV_ARM_GCC_V5], 1, [GCC ARM v5])
         AC_MSG_RESULT([yes])
-    else
-        AC_MSG_RESULT([no])
     fi
 ], [AC_MSG_RESULT([no])])
 fi
 
 
-# PV_ARM_V5
-# PV_ARM_V4
-# PV_ARM_MSC_EVC_V4
-# PV_ARM_MSC_EVC_V5
-# PV_ARM_GCC_V5
-# PV_ARM_GCC_V4
-
+AC_MSG_CHECKING([enabled Network player])
+AC_ARG_WITH([netplayer], [APR_HELP_STRING([--with-netplayer], [enable Network player [[default=yes]]])],
+[
+    if test "$with_netplayer" == "no"; then
+		AC_MSG_RESULT([no])
+	else
+		# Check for libshout
+		AC_MSG_RESULT([yes])
+	fi
+], [AC_MSG_RESULT([yes])])
 
 dnl ############## Header Checks
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h pthread.h])
 
+if test "$with_netplayer" != "no"; then
+	AC_CHECK_HEADERS([curl/curl.h])
+	PKG_CHECK_MODULES([CURL], [libcurl >= 7.16])
+	NETPLAYER_CFLAGS="$libcurl_CFLAGS"
+	NETPLAYER_LIBS="$libcurl_LIBS"
+	AC_SUBST(with_netplayer)
+	NETPLAYER=aacNetPlayer
+	AC_SUBST(NETPLAYER)
+	AC_SUBST(NETPLAYER_LIBS)
+	AC_SUBST(NETPLAYER_CFLAGS)
+	fi
 
 dnl ############## Final Output
 CFLAGS="$CFLAGS -Wall"
